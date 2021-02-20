@@ -133,6 +133,20 @@ data = yamale.make_data('./data.yaml', parser='ruamel')
 yamale.validate(schema, data)
 ```
 
+You can include your own python constructors to support custom YAML tags.  
+**WARNING:** This enables the default yaml loader which allows arbitrary python to run through any loaded YAML files. Use at your own risk!
+```python
+import yamale
+schema = yamale.make_schema('./schema.yaml')
+# Create a Data object using dict of custom constructor tuple(s)
+data = yamale.make_data('./data.yaml', constructors={('!join', _joiner)})
+#allows join function to be called on arbitrary sequences in yaml, works with anchors and aliases
+#example: !join [root/path/, relative/path]
+def _joiner(loader, node):
+    seq = loader.construct_sequence(node)
+    return ''.join([str(i) for i in seq])
+```
+
 ### Schema
 To use Yamale you must make a schema. A schema is a valid YAML file with one or more documents
 inside. Each node terminates in a string which contains valid Yamale syntax. For example, `str()`
